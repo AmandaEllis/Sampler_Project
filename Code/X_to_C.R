@@ -1,11 +1,13 @@
 #Takes the X array and transforms to the C matrix
 #C matrix is the binary matrix which denotes the photgraph pairs
-X_to_C<-function(X,N.photo,N.obs.photographed){
+X_to_C<-function(X){
   
 #List photos for each individual
-indiv.photos<-vector("list",N.obs.photographed)           
+N.obs.photographed<-max(X[,3])
+indiv.photos<-vector("list",N.obs.photographed)
+
 for(i in 1:N.obs.photographed){
-    indiv.photos[[i]]<-unlist(unlist(X[[i]]))
+    indiv.photos[[i]]<-X[which(X[,3]==i),1]
     }
 
 C<-matrix(0,nrow=N.photo,ncol=N.photo)

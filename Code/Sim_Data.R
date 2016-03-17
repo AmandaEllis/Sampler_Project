@@ -45,13 +45,12 @@ sim.data.M0<-function(parameters,output){
   N.obs.photographed<-nrow(Y)
   Sim.X<-Simulate.X(Y,N.photo,N.obs.photographed)
   X<-Sim.X$X
-  photo.occasion<-Sim.X$photo.occasion
-  
+
   #Returns X
   if(output=='X'){return(X)}
   
   #Computes matrix based off of X matrix
-  C<-X_to_C(X,N.photo,N.obs.photographed)
+  C<-X_to_C(X)
   
   #Returns C
   if(output=='c'){return(c)}
@@ -60,5 +59,5 @@ sim.data.M0<-function(parameters,output){
   S<-Sim.S(C,alpha.match,beta.match,alpha.non.match,beta.non.match,N.photo)
 
   if(output=='S'){return(S)}
-  if(output=='ALL'){return(list('S'=S,'photo.occasion'=photo.occasion,'W'=W,'Y'=Y,'X'=X,'C'=C))}
+  if(output=='ALL'){return(list('S'=S,'photo.occasion'=X[,1:2],'W'=W,'Y'=Y,'X'=X,'C'=C))}
 }
