@@ -2,7 +2,7 @@
 #Simulate X, where X is the array of photos for each capture history.
 #Outputs both the X array in dataframe form and the capture occasion for each photo.
 
-Simulate.X<-function(Y,N.photo,N.obs.photographed){
+Simulate.X<-function(Y,N.photo,N.obs.photographed,t){
 
 photo.id<-c(1:N.photo)                              #List of photo IDs
 photo.occasion<-rep(NA,length=N.photo)              #Vector that gives the capture occasion for each photo ID
@@ -25,5 +25,5 @@ for(i in 1:N.obs.photographed){
   }
 }
 
-return(X)
+return('X'=X)
 }

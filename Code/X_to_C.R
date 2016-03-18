@@ -1,6 +1,6 @@
 #Takes the X array and transforms to the C matrix
 #C matrix is the binary matrix which denotes the photgraph pairs
-X_to_C<-function(X){
+X_to_C<-function(X,N.photo){
   
 #List photos for each individual
 N.obs.photographed<-max(X[,3])

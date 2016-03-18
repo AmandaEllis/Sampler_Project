@@ -11,6 +11,9 @@ library(igraph)
 source("Sim_Data.R")                           #Source Data Simulation function
 #source("Matrix_Check.R")                       #Souce Matrix Check function 
 source("initial_X.R") 
+source("new_X.R")
+source("X_to_C.R")
+source("X_to_Y.R")
 
 #####################
 ####Simulate Data####
@@ -94,72 +97,26 @@ for(i in 2:(iterations+burn.in)){                             #Gibbs sampler
 #Sample X using MH step
 
 #Generate a Canidate X
-
-print(canidate.X)
+    candidate.X<-new.X(X.MH[[i-1]],k)
+    print(candidate.X)
 
 #In order to compute the acceptance probablity we need to compute C
 # Compute C
-canidate.C<-matrix(NA,nrow=N.photos,ncol=N.photos)
-
-for(j in 1:N.photos){                     #Sets the diagonal of C equal to 1
-  canidate.C[j,j]<-1
-}
-
-#Computes the number of individuals in canidate X
-n.cand.ind<-length(canidate.X[,1,1])
-
-#List photos for each individual
-indiv.photos.canidate<-vector("list",n.cand.ind)          
-for(j in 1:n.cand.ind){
-  indiv.photos.canidate[[j]]<-as.vector(canidate.X[j,,])[!is.na(as.vector(canidate.X[j,,]))]
-}
-
-#Looks at the photos for each individual sets all possible pairs per individual to 1
-for(l in 1:n.cand.ind){                           
-  current.indiv<-as.vector(indiv.photos.canidate[[l]])
-  if(length(current.indiv)>1){
-    pairs<-combn(current.indiv,m=2)
-    for(j in 1:length(pairs[1,])){
-      canidate.C[pairs[1,j],pairs[2,j]]<-1
-      canidate.C[pairs[2,j],pairs[1,j]]<-1
-    }
-  }
-}
-
-#Changes the rest of c to zeros
-canidate.C[is.na(canidate.C)]<-0                           
-#Matrix.Check(canidate.C)  
-print(canidate.C)
-
+    candidate.C<-X_to_C(candidate.X,N.photos)
+    print(canidate.C)
+                           
 #In order to compute the acceptance probablity we need to compute Y
-canidate.Y<-matrix(NA,nrow=M,ncol=t)
-
-#Looks at each individual and each time occasion and if a photo was taken sets capture equal to 1
-for(j in 1:nrow(canidate.X)){
-  for(l in 1:t){
-    if(sum(canidate.X[j,l,]!='NA',na.rm = TRUE)!=0){canidate.Y[j,l]=sum(canidate.X[j,l,]!='NA',na.rm = TRUE)} 
-  }
-}
-
-#Changes the rest of W to zeros
-canidate.Y[is.na(canidate.Y)]<-0
+    candidate.Y<-X_to_Y(candidate.X,t)
+    print(candidate.Y)
 
 #In order to compute the acceptance probablity we need to compute W
-canidate.W<-matrix(NA,nrow=M,ncol=t)
-
 #For each individual and each time occasion and if a photo was taken sets capture equal to 1
-canidate.W[canidate.Y>0]=1
+    candidate.W<-candidate.Y
+    candidate.W[candidate.Y>0]=1
+    print(canidate.W)
 
-print(canidate.W)
-
-
-
-#Changes the rest of W to zeros
-canidate.W[is.na(canidate.W)]<-0
-
-print(canidate.W)
 #Delete
-X.MH[[i]]<-canidate.X
+X.MH[[i]]<-candidate.X
 
 
 }

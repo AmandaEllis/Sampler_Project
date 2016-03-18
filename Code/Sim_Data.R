@@ -43,14 +43,14 @@ sim.data.M0<-function(parameters,output){
   #Simulate photo.occasion, which gives the capture occasion for each photo
   N.photo<-sum(Y) 
   N.obs.photographed<-nrow(Y)
-  Sim.X<-Simulate.X(Y,N.photo,N.obs.photographed)
-  X<-Sim.X$X
+  X<-Simulate.X(Y,N.photo,N.obs.photographed,t)
+
 
   #Returns X
   if(output=='X'){return(X)}
   
   #Computes matrix based off of X matrix
-  C<-X_to_C(X)
+  C<-X_to_C(X,N.photo)
   
   #Returns C
   if(output=='c'){return(c)}
