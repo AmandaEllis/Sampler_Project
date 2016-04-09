@@ -1,7 +1,7 @@
 # function for simulating data for model M_0 with t capture occassions
 # paramters is a list of parameters need to generate the data described below
 # output is the desired data to output, can return W, Wp C or S
-# 3/15/2016
+# 4/08/2016
 source("Simulate_X.R")
 source("X_to_C.R")
 source("Simulate_S.R")
@@ -24,13 +24,13 @@ sim.data.M0<-function(parameters,output){
   
   if(output=='W'){return(W)} #Returns observed capture history matrix
   
-  #Simulate the number of photos at each occasion using a poisson
-  # We allow for the possibility that an animal was captured but no photo was taken.
-  #Independent poissons are generated for each possible capture
+  #Model the additional photographs at each occasion using a poisson
+  #Independent poissons are generated for each possible capture and 1 is added to each
   #Then multiplied by W, those animals animals not captured are multipled by 0 and 
   #those captured are multiplied by 1
+  
   N.obs<-length(W[,1])      #Number of observed individuals
-  Y<-matrix(rpois(n=(N.obs*t),lambda=lambda),nrow=N.obs,ncol=t)*W
+  Y<-matrix((rpois(n=(N.obs*t),lambda=lambda)+1),nrow=N.obs,ncol=t)*W
   
   #Remove individuals that were not photographed
   Y<-Y[rowSums(Y)>0,]

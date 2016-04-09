@@ -38,15 +38,15 @@ t<-parameters$t                      #Gives the number of capture occasions
 N.photos<-length(C.true[1,])         #Gives the number of photos that were taken
 
 #Tuning parameters
-k<-3  #Used for canidate X
+k<-3  #Used for canidate X, must be smaller than min photos taken on a single occasion
 
 #Save output to txt for debugging
 #sink("C:/Users/Amand/Dropbox/A_Ellis/Code/Sampler_Photographs/Sampler_Project/output.txt", append=FALSE, split=FALSE)
-
+#sink()
 ################
 #### MCMC  #####
 ################
-iterations<-10000
+iterations<-3
 burn.in<-0
 
 #Define Chains
@@ -74,6 +74,7 @@ N.gibbs[[1]]<-parameters$N
 ##################
 #### Sampler #####
 ##################
+sink("C:/Users/Amanda/Dropbox/A_Ellis/Code/Sampler_Photographs/Sampler_Project/output.txt", append=TRUE, split=FALSE)
 
 for(i in 2:(iterations+burn.in)){                             #Gibbs sampler
 
@@ -97,13 +98,13 @@ for(i in 2:(iterations+burn.in)){                             #Gibbs sampler
 #Sample X using MH step
 
 #Generate a Canidate X
-    candidate.X<-new.X(X.MH[[i-1]],k)
+    candidate.X<-new.X(X.MH[[i-1]],k,t)
     print(candidate.X)
 
 #In order to compute the acceptance probablity we need to compute C
 # Compute C
     candidate.C<-X_to_C(candidate.X,N.photos)
-    print(canidate.C)
+    print(candidate.C)
                            
 #In order to compute the acceptance probablity we need to compute Y
     candidate.Y<-X_to_Y(candidate.X,t)
@@ -113,11 +114,10 @@ for(i in 2:(iterations+burn.in)){                             #Gibbs sampler
 #For each individual and each time occasion and if a photo was taken sets capture equal to 1
     candidate.W<-candidate.Y
     candidate.W[candidate.Y>0]=1
-    print(canidate.W)
+    print(candidate.W)
 
 #Delete
 X.MH[[i]]<-candidate.X
-
 
 }
 
