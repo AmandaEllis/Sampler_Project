@@ -10,7 +10,7 @@ X_to_Y<-function(X,t){
     }
   
   
-  #Changes the rest of W to zeros
+  #Changes the rest of Y to zeros
   Y[is.na(Y)]<-0
   
   return(Y)

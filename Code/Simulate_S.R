@@ -5,9 +5,9 @@ Sim.S<-function(C,alpha.match,beta.match,alpha.non.match,beta.non.match,N.photo)
   S<-matrix(NA,nrow=N.photo,ncol=N.photo)
   for(i in 1:(N.photo-1)){
     for(j in (i+1):N.photo){
-      if(C[i,j]==1){S[i,j]=rbeta(n=1,shape1=alpha.match,shape2=beta.match) 
+      if(C[i,j]==1){S[i,j]=rbeta(n=1,shape1=alpha.match,shape2=beta.match)-.0001 #Values are slightly reduced to keep away from 1 
       }else{
-        S[i,j]=rbeta(n=1,shape1=alpha.non.match,shape2=beta.non.match)
+        S[i,j]=rbeta(n=1,shape1=alpha.non.match,shape2=beta.non.match)+.0001 #Values are slightly increased to keep away from 0 
       }
     }
   }

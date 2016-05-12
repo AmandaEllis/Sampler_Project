@@ -3,13 +3,14 @@
 #These photos are then randomly assigned to a different individual
 #This is repeated for each capture occasion
 
-new.X<-function(X,t){
+new.X.fun<-function(X,t){
 prev.ind<-max(X[,3])  #Computes the number of individuals in current X
 new.X<-X
 
 #choose removal location for photo and set individual for photo equal to NA
 remove.location<-sample(X[which(X[,2]==t),1],1)
 new.X[remove.location,3]<-NA
+photo<-remove.location
 
 #If we remove all of the photographs for an individual we need to renumber the individuals
 #Otherwise we will have zero rows in W and favor moving photographs to a new individuals 
@@ -27,7 +28,7 @@ if(num.lost.ID>0){
       }
 }
 
-new.ind<-max(X[,3]) #Computes the number of individuals in new X
+new.ind<-max(new.X[,3],na.rm=TRUE) #Computes the number of individuals in new X
 
 #Relocate the photo
 #sample individual and place photo 
@@ -35,6 +36,6 @@ new.ind<-max(X[,3]) #Computes the number of individuals in new X
 new.individual<-sample(1:(new.ind+1),1)
 new.X[remove.location,3]<-new.individual
 
-return(list("new.X"=new.X,"n.ID.cand.X"=new.ind,"n.ID.curr.X"=prev.ind))
+return(list("new.X"=new.X,"n.ID.cand.X"=new.ind,"n.ID.curr.X"=prev.ind,"photo"=photo))
 
 }

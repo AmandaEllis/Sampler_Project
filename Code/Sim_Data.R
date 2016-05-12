@@ -5,6 +5,8 @@
 source("Simulate_X.R")
 source("X_to_C.R")
 source("Simulate_S.R")
+source("rtpois.R")
+
 
 sim.data.M0<-function(parameters,output){
   t=parameters$t
@@ -30,7 +32,8 @@ sim.data.M0<-function(parameters,output){
   #those captured are multiplied by 1
   
   N.obs<-length(W[,1])      #Number of observed individuals
-  Y<-matrix((rpois(n=(N.obs*t),lambda=lambda)+1),nrow=N.obs,ncol=t)*W
+  
+  Y<-matrix((rtpois(n=(N.obs*t),lambda=lambda)),nrow=N.obs,ncol=t)*W
   
   #Remove individuals that were not photographed
   Y<-Y[rowSums(Y)>0,]
