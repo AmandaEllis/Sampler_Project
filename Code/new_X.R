@@ -1,7 +1,6 @@
 #Function that generates a new X
 #New X is chosen by selecting a single photograph from a random ocassion 
 #These photos are then randomly assigned to a different individual
-#This is repeated for each capture occasion
 
 new.X.fun<-function(X,t){
 prev.ind<-max(X[,3])  #Computes the number of individuals in current X
@@ -31,10 +30,17 @@ if(num.lost.ID>0){
 new.ind<-max(new.X[,3],na.rm=TRUE) #Computes the number of individuals in new X
 
 #Relocate the photo
-#sample individual and place photo 
-#Individual is sampled from current individuals plus allowance for new individual
-new.individual<-sample(1:(new.ind+1),1)
-new.X[remove.location,3]<-new.individual
+#Select a number from .5,1,1.5,...,new.ind, new.ind +.5
+#where a whole number indicates that the photograph should be assigned to an existing individual and a half 
+#number indicates that the photograph should be assigned to a new individual between two existing individuals 
+new.individual<-sample(seq(from=.5,to=(new.ind+.5),by=.5),1)
+
+if(floor(new.individual)==new.individual){
+  new.X[remove.location,3]<-new.individual
+}else{
+  new.X[which(new.X[,3]>new.individual),3]=new.X[which(new.X[,3]>new.individual),3]+1
+  new.X[remove.location,3]<-new.individual+.5
+  }
 
 return(list("new.X"=new.X,"n.ID.cand.X"=new.ind,"n.ID.curr.X"=prev.ind,"photo"=photo))
 

@@ -20,8 +20,8 @@ source("S_Stat_W.R")                           #Source function to calcuate suff
 ####Simulate Data####
 #####################
 parameters<-list(t=3,                     # t denotes number of capute occasions
-                 p=.8,                    # p denotes probability of capture at each occasion
-                 N=20,                   # N is the total population size
+                 p=.6,                    # p denotes probability of capture at each occasion
+                 N=50,                   # N is the total population size
                  lambda=1,                # lambda: The number of photos per individual is modeled using a poisson dist
                                           # lambda is the mean of a Poisson before truncation the mean of the truncated poisson is E(X) = T/(1 - exp(-T))
                  alpha.match=6,           # alpha.match and beta.match are the parameters in the beta distribution for true matches
@@ -49,7 +49,7 @@ beta.non.match=parameters$ beta.non.match
 #########################
 ####Tuning Parameters####
 #########################
-k<-8                                    #Used for canidate X, tells the number of photos perturbed in an iteration of the chain
+k<-10                                    #Used for canidate X, tells the number of photos perturbed in an iteration of the chain
 
 ################
 #### Priors ####
@@ -80,8 +80,8 @@ lambda.MH<-rep(NA, length=iterations+burn.in)
 p.gibbs[1] <-parameters$p
 lambda.MH[1]<-parameters$lambda
 X.MH[[1]]<-X.true
-N.gibbs[[1]]<-parameters$N
-
+#N.gibbs[[1]]<-parameters$N
+N.gibbs[[1]]<-100
 # initial_X_N<-initial.X(S,photo.occasion.true,parameters)
 # X.MH[[1]]<-initial_X_N$X.observed
 # #Initial value for N is the number of observed individuals in initial X array
@@ -93,31 +93,32 @@ N.gibbs[[1]]<-parameters$N
 #### Sampler #####
 ##################
 # Start the clock!
-ptm <- proc.time()
-
+#ptm <- proc.time()
+#options(warn=2)
 for(i in 2:(iterations+burn.in)){                             #Gibbs sampler with Metropolis Hasting Steps
-  options(warn=2)
+
   #Get the sufficient Statistics from W to sample N and p
-    stat.output<-S.Stat.W(X.MH[[i-1]],t)
+  stat.output<-S.Stat.W(X.MH[[i-1]],t)
 
   ###############################
   ## Sample N  using gibbs step##
   ###############################
-  
-    a=stat.output$n.obs.ind+alpha.N
-    b=(1+beta.N-((1-p.gibbs[i-1])^t))/((1-p.gibbs[i-1])^t)
-    l<-rgamma(1,a,b)
-    U<-rpois(1,l)
-    N.gibbs[i]<- stat.output$n.obs.ind + U 
-    #N.gibbs[i]<-parameters$N
+    
+  #See link and Barker pg 205
+  a=stat.output$n.obs.ind+alpha.N
+  b=(1+beta.N-((1-p.gibbs[i-1])^t))/((1-p.gibbs[i-1])^t)
+  l<-rgamma(1,a,b)
+  U<-rpois(1,l)
+  N.gibbs[i]<- stat.output$n.obs.ind + U 
+  #N.gibbs[i]<-parameters$N
   
   ###############################
   ## Sample p  using gibbs step##
   ###############################
-  #   alpha.p.gibbs<-alpha.p+stat.output$total.captures
-  #   beta.p.gibbs<-t*N.gibbs[i]-stat.output$total.captures+beta.p
-  #   p.gibbs[i]<-rbeta(1,alpha.p.gibbs,beta.p.gibbs)
-  p.gibbs[i]<-parameters$p
+    alpha.p.gibbs<-alpha.p+stat.output$total.captures
+    beta.p.gibbs<-t*N.gibbs[i]-stat.output$total.captures+beta.p
+    p.gibbs[i]<-rbeta(1,alpha.p.gibbs,beta.p.gibbs)
+  #p.gibbs[i]<-parameters$p
 
   ####################################
   ## Sample lambda  using gibbs step##
@@ -198,23 +199,8 @@ for(i in 2:(iterations+burn.in)){                             #Gibbs sampler wit
 
 }
 
+#write.table(N.gibbs,paste0('results',rep))
 # Stop the clock
-proc.time() - ptm
+#proc.time() - ptm
 
-#hist(N.gibbs, freq=FALSE, xlab="N", col="gray", border="white", main="")
-(posterior.mean.N<-mean(as.vector(N.gibbs),na.rm=TRUE))
-plot(as.vector(N.gibbs),type='l')
-CI<-.95
-prob=1-CI
-lb=prob/2
-ub=1-prob/2
-(CI.N<-quantile(N.gibbs,c(lb,ub),names=FALSE))
-
-(posterior.mean.p<-mean(as.vector(p.gibbs),na.rm=TRUE))
-plot(as.vector(p.gibbs),type='l')
-CI<-.95
-prob=1-CI
-lb=prob/2
-ub=1-prob/2
-(CI.p<-quantile(p.gibbs,c(lb,ub),names=FALSE))
 

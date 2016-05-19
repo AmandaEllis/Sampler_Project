@@ -26,8 +26,8 @@ sim.data.M0<-function(parameters,output){
   
   if(output=='W'){return(W)} #Returns observed capture history matrix
   
-  #Model the additional photographs at each occasion using a poisson
-  #Independent poissons are generated for each possible capture and 1 is added to each
+  #Model the additional photographs at each occasion using a truncated poisson
+  #Independent truncated oissons are generated for each possible capture 
   #Then multiplied by W, those animals animals not captured are multipled by 0 and 
   #those captured are multiplied by 1
   
