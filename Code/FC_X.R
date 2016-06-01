@@ -36,7 +36,7 @@ FC.X<-function(FC.input){
   ###############
   ## [S^obs|X] ##
   ###############
-  d.S.X.output<-d.S.given.X(current.X,candidate.X,S,N.photos,photo)
+  d.S.X.output<-d.S.given.X(current.X,candidate.X,S,N.photos,photo,alpha.match,beta.match,alpha.non.match,beta.non.match)
   d.S.given.current.X<-d.S.X.output$d.S.given.current.X
   d.S.given.candidate.X<-d.S.X.output$d.S.given.candidate.X
   

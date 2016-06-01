@@ -2,7 +2,7 @@
 #When the ith photo is moved we only need the rows of the current C and candidate C that are
 #affected by the move.
 
-d.S.given.X<-function(current.X,candidate.X,S,N.photos,photo){
+d.S.given.X<-function(current.X,candidate.X,S,N.photos,photo,alpha.match,beta.match,alpha.non.match,beta.non.match){
 
   #In order to compute the acceptance probablity we need to compute C
   #Compute C for the candidate and current X

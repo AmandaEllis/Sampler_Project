@@ -19,15 +19,8 @@ source("S_Stat_W.R")                           #Source function to calcuate suff
 #####################
 ####Simulate Data####
 #####################
-parameters<-list(t=3,                     # t denotes number of capute occasions
-                 p=.6,                    # p denotes probability of capture at each occasion
-                 N=50,                   # N is the total population size
-                 lambda=1,                # lambda: The number of photos per individual is modeled using a poisson dist
-                                          # lambda is the mean of a Poisson before truncation the mean of the truncated poisson is E(X) = T/(1 - exp(-T))
-                 alpha.match=6,           # alpha.match and beta.match are the parameters in the beta distribution for true matches
-                 beta.match=2,
-                 alpha.non.match=2,       # alpha.non.match and beta.non.match are the parameters in the beta distribution for true non-matches
-                 beta.non.match=6)
+sampler.M0<-function(parameters,k,priors,iterations,burn.in){
+
 
 data<-sim.data.M0(parameters,'ALL')       #Simulates Data
 
@@ -46,42 +39,44 @@ beta.match=parameters$beta.match
 alpha.non.match=parameters$alpha.non.match   # alpha.non.match and beta.non.match are the parameters in the beta distribution for true non-matches
 beta.non.match=parameters$ beta.non.match
 
-#########################
-####Tuning Parameters####
-#########################
-k<-10                                    #Used for canidate X, tells the number of photos perturbed in an iteration of the chain
 
 ################
 #### Priors ####
 ################
 
-alpha.p<-.5   #p has a beta prior
-beta.p <-.5
+alpha.p<-priors$alpha.p   #p has a beta prior
+beta.p <-priors$beta.p 
 
-alpha.N<-0    #N has negative binomial prior
-beta.N <-0
+alpha.N<-priors$alpha.N    #N has negative binomial prior
+beta.N <-priors$beta.N 
 
 ################
 #### MCMC  #####
 ################
-iterations<-10000
-burn.in<-1000
 
 #Define Chains
 N.gibbs<-rep(NA,length=iterations+burn.in)
 p.gibbs<-rep(NA,length=iterations+burn.in)
-X.MH<-list(NA,length=iterations+burn.in)
+#X.MH<-list(NA,length=iterations+burn.in)
 lambda.MH<-rep(NA, length=iterations+burn.in)
 
 
 ######################
 ####intial values#####
 ######################
-p.gibbs[1] <-parameters$p
-lambda.MH[1]<-parameters$lambda
-X.MH[[1]]<-X.true
-#N.gibbs[[1]]<-parameters$N
-N.gibbs[[1]]<-100
+
+initial<-list(p.gibbs =parameters$p,
+              lambda.MH=parameters$lambda,
+              #X.MH[[1]]<-X.true
+              current.X=X.true,
+              N.gibbs=parameters$N)
+
+p.gibbs[1] <-initial$p.gibbs
+lambda.MH[1]<-initial$lambda.MH
+#X.MH[[1]]<-X.true
+current.X<-initial$current.X
+N.gibbs[[1]]<-initial$N.gibbs
+
 # initial_X_N<-initial.X(S,photo.occasion.true,parameters)
 # X.MH[[1]]<-initial_X_N$X.observed
 # #Initial value for N is the number of observed individuals in initial X array
@@ -98,8 +93,9 @@ N.gibbs[[1]]<-100
 for(i in 2:(iterations+burn.in)){                             #Gibbs sampler with Metropolis Hasting Steps
 
   #Get the sufficient Statistics from W to sample N and p
-  stat.output<-S.Stat.W(X.MH[[i-1]],t)
-
+  #stat.output<-S.Stat.W(X.MH[[i-1]],t)
+  stat.output<-S.Stat.W(current.X,t)
+  
   ###############################
   ## Sample N  using gibbs step##
   ###############################
@@ -115,10 +111,10 @@ for(i in 2:(iterations+burn.in)){                             #Gibbs sampler wit
   ###############################
   ## Sample p  using gibbs step##
   ###############################
-    alpha.p.gibbs<-alpha.p+stat.output$total.captures
-    beta.p.gibbs<-t*N.gibbs[i]-stat.output$total.captures+beta.p
-    p.gibbs[i]<-rbeta(1,alpha.p.gibbs,beta.p.gibbs)
-  #p.gibbs[i]<-parameters$p
+#     alpha.p.gibbs<-alpha.p+stat.output$total.captures
+#     beta.p.gibbs<-t*N.gibbs[i]-stat.output$total.captures+beta.p
+#     p.gibbs[i]<-rbeta(1,alpha.p.gibbs,beta.p.gibbs)
+  p.gibbs[i]<-parameters$p
 
   ####################################
   ## Sample lambda  using gibbs step##
@@ -134,7 +130,7 @@ for(i in 2:(iterations+burn.in)){                             #Gibbs sampler wit
   #After the removal of a photo the move is accepted or rejected using a MH acceptance probability
   #This is repeated k times during an iteration of the chain
 
-  current.X<-X.MH[[i-1]]
+  #current.X<-X.MH[[i-1]]
   
   for(j in 1:k){
     #randomly select a capture occasion
@@ -142,7 +138,7 @@ for(i in 2:(iterations+burn.in)){                             #Gibbs sampler wit
     
     #Outputs a candidate X and the ID of the photo that was removed
     #Also outputs the number of individuals in the candidate and current X
-    output<-new.X.fun(X.MH[[i-1]],cap.occasion)
+    output<-new.X.fun(current.X,cap.occasion)
     candidate.X<-output$new.X
     photo<-output$photo
 
@@ -188,18 +184,21 @@ for(i in 2:(iterations+burn.in)){                             #Gibbs sampler wit
     acceptance.prob<-min(1,ratio)
     
     u=runif(1)
+    
     if (u<acceptance.prob){
-      print(1)
+      #print(1)
       current.X<-candidate.X
-    }else print(0)
+    }#else print(0)
+    
   }
 
-  X.MH[[i]]<-current.X
-  #X.MH[[i]]<-X.true
+  #X.MH[[i]]<-current.X
+  
 
 }
 
-#write.table(N.gibbs,paste0('results',rep))
+return(list('N.gibbs'=N.gibbs,'p.gibbs'=p.gibbs,'lambda.MH'=lambda.MH,"current.X"=current.X))
+}
 # Stop the clock
 #proc.time() - ptm
 
