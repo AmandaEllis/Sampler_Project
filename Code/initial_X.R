@@ -7,15 +7,21 @@
 #####################
 ####Packages Used####
 #####################
-library(abind)
 library(igraph)
 
-initial.X<-function(S,photo.occasion.true,parameters){
+initial.X<-function(S,photo.occasion.true,parameters, N.photos){
+
+alpha<-parameters$alpha.match
+beta<-parameters$beta.match
+
+photo.individual<-rep(NA,length=N.photos)            #Vector that gives the individual for each photo ID
+X<-data.frame(photo.occasion.true,photo.individual)
   
-match.mean<-(parameters$alpha.match)/(parameters$alpha.match+parameters$beta.match)
-C.observed<-S
-C.observed[which(C.observed>=match.mean)]=1  #Set values greater than the mean equal to 1
-C.observed[which(C.observed<match.mean)]=0   #Set values less than the mean equal to 0
+match.mean<-(alpha)/(alpha+beta) #Mean of the beta distribution for match pairs
+match.var<-(alpha*beta)/((alpha+beta)^2+(alpha+beta+1))
+C.observed<-S                                                                       #Set C.observed equal to S. 
+C.observed[which(C.observed>=(match.mean+match.var/4))]=1  #Set values greater than the mean equal to 1
+C.observed[which(C.observed<(match.mean+match.var/4))]=0   #Set values less than the mean equal to 0
 
 #Transitive Closure over the pairs
 i <- clusters(graph.adjacency(C.observed))$membership
@@ -38,33 +44,11 @@ for(i in 1:n.obs.indiv){
 }
 
 #Finds for each individual the occasions that individual was seen on
-obs.occasions<-vector("list",n.obs.indiv)
-
 for(i in 1:n.obs.indiv){
-  for(j in 1:length(obs.photo.indiv[[i]]))
-  obs.occasions[[i]][j]<-photo.occasion.true[obs.photo.indiv[[i]][j],2]
+  X[obs.photo.indiv[[i]],3]<-i
 }
 
-#Finds the number of photos for each individual per occasion
-n.photos.occasion<-vector("list",n.obs.indiv)
-for(i in 1:n.obs.indiv){
-  n.photos.occasion[[i]]<-as.data.frame(table(obs.occasions[[i]]))[,2]
-}
 
-#Finds the maximum number of photos per individual per occasion
-max.photo<-max(sapply(n.photos.occasion, max)) 
-
-#Define observed X array using the photos for each individual and occasion photos were taken
-X.observed<-list()
-
-for(i in 1:n.obs.indiv){
-  X.observed[[i]]<-list()
-  for(j in 1:t){
-            temp<-obs.photo.indiv[[i]][which(photo.occasion.true[obs.photo.indiv[[i]],2]==j)]
-            X.observed[[i]][[j]]<-as.list(temp)
-  }
-}
-
-return(list('X.observed'=X.observed,'n.obs.indiv'=n.obs.indiv))
+return(list('X.observed'=X,'n.obs.indiv'=n.obs.indiv))
 
 }

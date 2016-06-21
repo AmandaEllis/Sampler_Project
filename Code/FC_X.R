@@ -1,6 +1,5 @@
 #This function computes the density of the full conditional of  X
-#Recall that for each candidate X we are only changing 1 photo
-#We only need the portion of the FC that is affected by the photo moving
+#We only need the portion of the FC that is affected by the photos that move
 #The full conditional is given by
 # [X|*] is proportional to [S^obs|X][X|Y][Y|W,lambda][W|N,p]
 #The function looks at each piece seperately. 
@@ -22,7 +21,7 @@ FC.X<-function(FC.input){
   current.X=FC.input$current.X                     #Current X
   N.photos=FC.input$N.photos                       #Total number of photos
   t=FC.input$t                                     #Number of capture occasions
-  photo=FC.input$photo                             #Photo that was agitated
+  photos=FC.input$photos                           #Photos that were agitated
   S=FC.input$S                                     #Matrix of pairwise scores -observed data
   beta.match=FC.input$beta.match                   # alpha.match and beta.match are the parameters in the beta distribution for true matches
   alpha.match=FC.input$alpha.match
@@ -36,14 +35,16 @@ FC.X<-function(FC.input){
   ###############
   ## [S^obs|X] ##
   ###############
-  d.S.X.output<-d.S.given.X(current.X,candidate.X,S,N.photos,photo,alpha.match,beta.match,alpha.non.match,beta.non.match)
+  d.S.X.output<-d.S.given.X(current.X,candidate.X,S,N.photos,photos,alpha.match,beta.match,alpha.non.match,beta.non.match)
   d.S.given.current.X<-d.S.X.output$d.S.given.current.X
   d.S.given.candidate.X<-d.S.X.output$d.S.given.candidate.X
+#   d.S.given.current.X<-0
+#   d.S.given.candidate.X<-0
   
   ###########
   ## [X|Y] ##
   ###########
-  d.X.Y.output<-d.X.given.Y(current.X,candidate.X,t,cap.occasion)
+  d.X.Y.output<-d.X.given.Y(current.X,candidate.X,t,photos)
   d.X.given.current.Y<-d.X.Y.output$d.X.given.current.Y
   d.X.given.candidate.Y<-d.X.Y.output$d.X.given.candidate.Y
   
@@ -52,6 +53,8 @@ FC.X<-function(FC.input){
   
   current.Y<-d.X.Y.output$current.Y                 #Used in [W|N,p]
   candidate.Y<-d.X.Y.output$candidate.Y
+  
+  cap.occasions<-d.X.Y.output$cap.occasions                      #Used in [W|N,p]         
   
   ##################
   ## [Y|W,lambda] ##
@@ -63,17 +66,31 @@ FC.X<-function(FC.input){
   # Also each Y equal to 0 has a corresponding W of 0.  Using independence we need only consider 
   # The candidate and current Y above.  
   
+  if(d.X.Y.output$same==FALSE){
   d.Y.given.current.W<-sum(dtpois(current.Y.ind,lambda,return.log='TRUE'))
   d.Y.given.candidate.W<-sum(dtpois(candidate.Y.ind,lambda,return.log='TRUE'))
-
+  }else{
+    #If the Y for the current and the candidate are the same then the densities will cancel.
+    d.Y.given.current.W<-0
+    d.Y.given.candidate.W<-0
+  }
+  
   ##############
   ## [W|N,p] ##
   #############
   
-  d.W.N.p.output<-d.W.given.N.p(current.Y,candidate.Y,N,p)
+  #We use the candidate Y and current Y from the output above
+  #The candidiate Y and current Y only contain the columns that differ
   
+  if(d.X.Y.output$same==FALSE){
+  d.W.N.p.output<-d.W.given.N.p(current.Y,candidate.Y,N,p,cap.occasions)
   d.W.current.given.Np<-d.W.N.p.output$d.W.current.given.Np
   d.W.candidate.given.Np<-d.W.N.p.output$d.W.candidate.given.Np
+  }else{
+    #If the Y for the current and the candidate are the same then the W are the same and the densities will cancel.
+    d.W.current.given.Np<-0
+    d.W.candidate.given.Np<-0
+  }
   
   ######################
   ## Full Conditional ##
@@ -83,6 +100,9 @@ FC.X<-function(FC.input){
   current.FC<-d.S.given.current.X+d.X.given.current.Y+d.Y.given.current.W+d.W.current.given.Np
   candidate.FC<-d.S.given.candidate.X+d.X.given.candidate.Y+d.Y.given.candidate.W+d.W.candidate.given.Np
 
+#   current.FC<-d.X.given.current.Y+d.Y.given.current.W+d.W.current.given.Np
+#   candidate.FC<-d.X.given.candidate.Y+d.Y.given.candidate.W+d.W.candidate.given.Np
+  
   return(list("current.FC"=current.FC,"candidate.FC"=candidate.FC))
     
   }

@@ -1,4 +1,4 @@
-setwd('C:/Users/Amand/Dropbox/A_Ellis/Code/Sampler_Photographs/Sampler_Project/Output5')
+setwd('C:/Users/Amanda/Dropbox/A_Ellis/Code/Sampler_Photographs/Sampler_Project/Output')
 
 CI<-.95
 prob=1-CI
@@ -22,10 +22,10 @@ for(i in 1:100){
   if(N<min(CI.N)){over=over+1}
 }
 
-(posterior.mean.p<-mean(as.vector(p.gibbs),na.rm=TRUE))
-plot(as.vector(output$N.gibbs),type='l')
+(posterior.mean.p<-mean(as.vector(N.gibbs),na.rm=TRUE))
+plot(as.vector(N.gibbs),type='l')
 CI<-.95
 prob=1-CI
 lb=prob/2
 ub=1-prob/2
-(CI.p<-quantile(p.gibbs,c(lb,ub),names=FALSE))
+(CI.p<-quantile(N.gibbs,c(lb,ub),names=FALSE))

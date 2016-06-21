@@ -2,16 +2,22 @@
 #When the ith photo is moved we only need the rows of the current C and candidate C that are
 #affected by the move.
 
-d.S.given.X<-function(current.X,candidate.X,S,N.photos,photo,alpha.match,beta.match,alpha.non.match,beta.non.match){
+d.S.given.X<-function(current.X,candidate.X,S,N.photos,photos,alpha.match,beta.match,alpha.non.match,beta.non.match){
 
   #In order to compute the acceptance probablity we need to compute C
   #Compute C for the candidate and current X
   current.C<-X_to_C(current.X,N.photos)
   candidate.C<-X_to_C(candidate.X,N.photos)
 
-  rows.current<-which(current.C[,photo]==1)     #Locates the rows in the current X that are affected by the removed photo
-  rows.candidate<-which(candidate.C[,photo]==1) #Locates the rows in the candidate X that are affected by the removed photo
-  comb.rows<-sort(unique(c(rows.candidate,rows.current))) #These rows will be used in Full conditional
+  rows.current<-NA
+  rows.candidate<-NA
+  
+  for(i in 1:length(photos)){
+  rows.current<-c(rows.current,which(current.C[,photos[i]]==1) )    #Locates the rows in the current X that are affected by the removed photo
+  rows.candidate<-c(rows.candidate,which(candidate.C[,photos[i]]==1)) #Locates the rows in the candidate X that are affected by the removed photo
+  }
+  
+  comb.rows<-sort(unique(c(rows.candidate,rows.current),rm.NA=TRUE)) #These rows will be used in Full conditional
 
   n.rows<-length(comb.rows)  #number of rows that are affected by the removed photo
 
@@ -30,6 +36,7 @@ d.S.given.X<-function(current.X,candidate.X,S,N.photos,photo,alpha.match,beta.ma
   #Notice that the sub Cs are still symmetric we need only compute the upper triangular portion
   
   #Loop over the upper triagular portion of the current C
+  #Notice that the diagaonal is the same for both the current and the candidiate so we do not need to caculate
   #Densities are calculated using log
   
   #Initialize the value of the density  
@@ -44,10 +51,10 @@ d.S.given.X<-function(current.X,candidate.X,S,N.photos,photo,alpha.match,beta.ma
   }
   
   #mMltiply by 2 since only the upper triangle was calculated. 
-  #Notice that the diagaonal is the same for both the current and the candidiate so we do not need to caculate
   d.S.given.current.X<-d.S.given.current.X*2
     
   #Loop over the upper triagular portion of the candidiate C
+  #Notice that the diagaonal is the same for both the current and the candidiate so we do not need to caculate
   #Densities are calculated using log
   d.S.given.candidate.X<-0
   temp<-0
@@ -60,8 +67,7 @@ d.S.given.X<-function(current.X,candidate.X,S,N.photos,photo,alpha.match,beta.ma
   }
   
   #Multiply by 2 since only the upper triangle was calculated. 
-  #Notice that the diagaonal is the same for both the current and the candidiate so we do not need to caculate
-  d.S.given.candidate.X<-d.S.given.candidate.X*2
+    d.S.given.candidate.X<-d.S.given.candidate.X*2
   
   return(list("d.S.given.candidate.X"=d.S.given.candidate.X,"d.S.given.current.X"=d.S.given.current.X))
 

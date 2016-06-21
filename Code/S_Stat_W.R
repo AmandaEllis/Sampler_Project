@@ -11,20 +11,20 @@ S.Stat.W<-function(X,t){
         captures[i]<-sum(W[,i])
       }
       
-      total.captures<-sum(captures)
+      # total.captures<-sum(captures)
       
-      first<-rep(NA,length=n.obs.ind) 
-      W.no.first<-W
-      for(i in 1:n.obs.ind){
-        first[i]<-min(which(W[i,]==1))        #Calculate when individual first observed
-        W.no.first[i,first[i]]<-0             #Sets the first occasion to 0
-      }
+#       first<-rep(NA,length=n.obs.ind) 
+#       W.no.first<-W
+#       for(i in 1:n.obs.ind){
+#         first[i]<-min(which(W[i,]==1))        #Calculate when individual first observed
+#         W.no.first[i,first[i]]<-0             #Sets the first occasion to 0
+#       }
+#       
+#       recaptures<-rep(NA,length=t)  #Calculate the number of recaptures per capture occasion
+#       for(i in 1:t){
+#         recaptures[i]<-sum(W.no.first[,i])
+#       }
       
-      recaptures<-rep(NA,length=t)  #Calculate the number of recaptures per capture occasion
-      for(i in 1:t){
-        recaptures[i]<-sum(W.no.first[,i])
-      }
-      
-      return(list("n.obs.ind"=n.obs.ind,"total.captures"=total.captures))
+      return(list("n.obs.ind"=n.obs.ind,"captures"=captures))
   
 }

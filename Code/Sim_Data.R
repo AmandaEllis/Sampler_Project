@@ -20,7 +20,11 @@ sim.data.M0<-function(parameters,output){
   
   #Simulate W, where W is the observed capture history matrix
   #First simulate W with both observed and unobserved individuals. W is simulated under model M0
-  W<-matrix(rbinom(n=(N*t),size=1,prob=p),nrow=N,ncol=t) 
+  W<-matrix(NA,ncol=t,nrow=N)
+  for(i in 1:t){
+    W[,i]=rbinom(N,size=1,prob=p[i])
+  }
+  
   remove<-apply(W,1,sum)==0  #Removed unobserved individuals
   W<-W[!remove,]
   
