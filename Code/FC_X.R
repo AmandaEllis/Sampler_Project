@@ -47,6 +47,7 @@ FC.X<-function(FC.input){
   d.X.Y.output<-d.X.given.Y(current.X,candidate.X,t,photos)
   d.X.given.current.Y<-d.X.Y.output$d.X.given.current.Y
   d.X.given.candidate.Y<-d.X.Y.output$d.X.given.candidate.Y
+
   
   current.Y.ind<-d.X.Y.output$current.Y.ind           #Used in [Y|W,lambda] 
   candidate.Y.ind<-d.X.Y.output$candidate.Y.ind

@@ -10,8 +10,14 @@ new.X.delete<-function(X,t){
   new.X<-X
   
   #Select individual to delete
-  current.n.ind<-max(X[,3]) 
-  lost.ID<-sample(1:current.n.ind,size=1)
+  #We select from the indidivuals not seen on all occasions
+  Y<-X_to_Y(X,t)
+  W<-Y
+  W[Y>0]=1
+  
+  individuals.seen.not.all<-which(rowSums(W)<t)
+  
+  lost.ID<-sample(individuals.seen.not.all,size=1)
   #photos that will need to be moved
   photos.allocate<-X[which(X[,3]==lost.ID),1]
   
